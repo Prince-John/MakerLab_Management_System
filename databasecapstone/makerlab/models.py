@@ -5,10 +5,8 @@ from django.db import models
 class Item(models.Model):
     item_name = models.CharField(max_length = 250, unique = True)
     quantity = models.IntegerField()
-
-    def __str__(self):
-        return self.item_name
-
+    vendor = models.ForeignKey('Vendor', on_delete = models.CASCADE, to_field = "vendor_name")
+    warranty = models.IntegerField()
 
 class RegisteredUser(models.Model):
     #passed in from frontend
@@ -23,10 +21,12 @@ class RegisteredUser(models.Model):
     def __str__(self):
         return self.user_id
 
-class InUseMachine(models.Model):
+class InUseItem(models.Model):
     #passed in from frontend
     user = models.ForeignKey('RegisteredUser', on_delete = models.CASCADE, to_field = "user_id") #foreign key of RegisteredUsers table
-    item = models.ForeignKey('Item', on_delete = models.CASCADE, to_field = "item_name") #foreign key of Inventory table
+    item = models.ForeignKey('Item', on_delete = models.CASCADE, to_field = "id") #foreign key of Inventory table
+    time_used_id = models.ForeignKey('EntryExit', on_delete = models.CASCADE, to_field = "id")
+
 
 class EntryExit(models.Model):
     #passed in from frontend
@@ -34,9 +34,25 @@ class EntryExit(models.Model):
     entry_time = models.DateTimeField()
     exit_time = models.DateTimeField()
 
+    def __str__(self):
+        return str(self.id)
+
 class Supervisor(models.Model):
+    #admin entry
     user = models.ForeignKey('RegisteredUser', on_delete = models.CASCADE, to_field = "user_id") #foreign key of RegisteredUsers table
-    first_name = models.CharField(max_length=200)
-    last_name = models.CharField(max_length=200)
+    email = models.EmailField()
     access_level = models.CharField(max_length = 200)
 
+class Vendor(models.Model):
+    #admin entry
+    vendor_name = models.CharField(max_length=200, unique = True)
+    city = models.CharField(max_length=200)
+    state = models.CharField(max_length=200)
+    zip = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.vendor_name
+
+class SavedQuery(models.Model):
+    query_name=models.CharField(max_length=200,unique=True)
+    query_sql=models.TextField(unique=True)
